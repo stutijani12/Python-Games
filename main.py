@@ -1,51 +1,47 @@
 import time
 from turtle import Screen
-from snake import Snake
-from food import Food
+from paddle import Paddle
 from scoreboard import Scoreboard
+from ball import Ball
 
 screen = Screen()
-screen.setup(width=600,height=600)
+ball = Ball()
+l_player = Paddle(-350,0)
+r_player = Paddle(350,0)
+scoreboard = Scoreboard()
+screen.setup(width=800, height=600)
 screen.bgcolor("black")
-screen.title("My snake game")
+screen.title("Pong")
 screen.tracer(0)
-
-
-snake = Snake()
-food = Food()
-score = Scoreboard()
-
-
 screen.listen()
-screen.onkey(snake.right, "Right")
-screen.onkey(snake.left, "Left")
-screen.onkey(snake.up, "Up")
-screen.onkey(snake.down, "Down")
-counter = 0
-game_on = True
+screen.onkey(r_player.up, "Up")
+screen.onkey(r_player.down," Down")
+screen.onkey(l_player.up,"w")
+screen.onkey(l_player.down,"s")
 
-
-
-while game_on:
+game_is_on = True
+while game_is_on:
+    time.sleep(0.1)
     screen.update()
-    time.sleep(0.2)
-    snake.move()
+    ball.move()
 
-    # detect collision between food and snake
-    if snake.head.distance(food) < 15:
-        food.refresh()
-        snake.extend()
-        score.increase_score()
+    # detect collision with top
+    if ball.ycor() > 280 or ball.ycor() < -280:
+        ball.bounce_y()
 
-    # detect collision with wall
-    if snake.head.xcor()> 280 or snake.head.xcor() < -280 or snake.head.ycor() > 280 or snake.head.ycor() < -280:
+    # detect collision with paddle
+    if ball.distance(r_player) < 50 and ball.xcor() > 320 or ball.distance(l_player) < 50 and ball.xcor() < -320:
+        ball.bounce_x()
 
-        score.reset()
-        snake.reset()
+    # detect r paddle miss
+    if ball.xcor() > 380:
+        ball.reset_position()
+        scoreboard.l_point()
 
-    # detect collision with tail
-    for segment in range(len(snake.segments))[1:]:
-        if snake.head.distance(snake.segments[segment]) < 10:
-            score.reset()
-            snake.reset()
+    # detect l paddle miss
+    if ball.xcor() < -380:
+        ball.reset_position()
+        scoreboard.r_point()
+
 screen.exitonclick()
+
